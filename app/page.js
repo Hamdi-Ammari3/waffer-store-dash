@@ -1,95 +1,106 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import React,{useState,useEffect} from 'react'
+import {useRouter} from 'next/navigation'
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import {DB} from '../firebaseConfig'
+import ClipLoader from "react-spinners/ClipLoader"
+import './style.css'
+import Navbar from '../components/navbar'
+import Post from '../components/post'
 
-export default function Home() {
+const page = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [posts, setPosts] = useState([])
+  const [loadingPosts, setLoadingPosts] = useState(false)
+  const [postLimit, setPostLimit] = useState(3)
+  const router = useRouter()
+
+  // Check if admin is logged in
+  useEffect(() => {
+    const adminLoggedIn = localStorage.getItem('shopLoggedIn')
+    const shopId = localStorage.getItem('shopID')
+    if (!adminLoggedIn) {
+      router.push('/login'); // Redirect to login page if not authenticated
+    } else {
+      setIsAuthenticated(true)
+      const unsubscribe = listenShopPosts(shopId)
+      return () => unsubscribe?.() // clean up listener on unmount
+    }
+  }, [])
+
+  // 🔥 Listen to shop document and update posts automatically
+  const listenShopPosts = (shopId) => {
+    const shopRef = doc(DB, "shops", shopId)
+
+    return onSnapshot(shopRef, async (shopSnap) => {
+      if (!shopSnap.exists()) {
+        setPosts([])
+        setPostLimit(3)
+        return
+      }
+
+      const shopData = shopSnap.data()
+      const postIds = shopData.posts || []
+      const limitedPostsNumber = shopData.limited_posts_number || 3
+      setPostLimit(limitedPostsNumber)
+
+      if (postIds.length === 0) {
+        setPosts([])
+        return
+      }
+
+      setLoadingPosts(true)
+
+      // Fetch each post document
+      const postsPromises = postIds.map(async (postId) => {
+        const postRef = doc(DB, "posts", postId)
+        const postSnap = await getDoc(postRef)
+        if (postSnap.exists()) {
+          return { id: postId, ...postSnap.data() }
+        }
+        return null
+      })
+
+      const postsData = (await Promise.all(postsPromises)).filter(Boolean)
+      setPosts(postsData)
+      setLoadingPosts(false)
+    })
+  }
+
+  // Callback to update a post in state
+  const handleUpdatePost = (updatedPost) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+    )
+  }
+
+  if (!isAuthenticated || loadingPosts) {
+    return (
+      <div style={{ width:'100vw',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <ClipLoader
+        color={'#29c978'}
+        loading={!isAuthenticated}
+        size={70}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
+      </div>   
+  )}
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className='dashboard-container'>
+      <Navbar postLimit={postLimit} postLength={posts?.length}/>
+      <div className='posts-list'>
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <Post key={post.id} post={post} onUpdatePost={handleUpdatePost}/>
+          ))
+        ) : (
+          <p style={{ textAlign: 'center', marginTop: 50 }}>لا توجد منشورات حاليا</p>
+        )}
+      </div>
     </div>
-  );
+  )
 }
+
+export default page

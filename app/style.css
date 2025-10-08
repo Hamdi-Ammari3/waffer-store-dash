@@ -1,0 +1,418 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+#app-container{
+    margin: 0;
+    padding: 0;
+}
+.login-container{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #F4F5FA;
+}
+.login-box{
+    width:27vw;
+    height:70vh;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: -10px 13px 5px -14px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.form-title-box{
+    width:30vw;
+    height: 15vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-form-box{
+    width:30vw;
+    height: 40vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.login-form-box > form {
+    height: 40vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.login-form-box > form > input{
+    width: 250px;
+    padding: 10px 0;
+    border: 1px solid #cccbcb;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+.login-form-box > form > textarea{
+    width:250px;
+    height: 70px;
+    padding: 10px;
+    resize:none;
+    border: 1px solid #dddcdc;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: right;
+    overflow: auto;
+}
+.login-form-box > form > input:focus,
+.login-form-box > form > textarea:focus,
+.creating-new-post-form-item-name > input,
+.creating-new-post-form-discount-value > div > input{
+    outline: none;
+}
+.login-form-box > form > button{
+    width: 250px;
+    height: 35px;
+    border: none;
+    border-radius: 10px;
+    background-color: #29c978;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.delete_account_box{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+}
+.delete_account_box > * {
+    font-size: 14px;
+}
+.delete_account_box > a {
+    text-decoration: none;
+    margin-right: 10px;
+}
+.dashboard-container{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    background-color: #F4F5FA;
+}
+.navbar{
+    width: 100vw;
+    height: 12vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: #29c978;
+}
+.navbar-post-limit-box,.add-new-post-box,.navbar_user_box{
+    width: 18vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.add-new-post-box > div{
+    width: 200px;
+    height: 35px;
+    background-color: #F4F5FA;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid #cccc;
+    box-shadow: -10px 10px 3px -14px rgba(0,0,0,0.5);
+    border-radius: 7px;
+    cursor: pointer;
+}
+.navbar_user_box{
+    flex-direction: row-reverse;
+}
+.navbar_user_box > button{
+    width: 70px;
+    height: 30px;
+    margin-right: 50px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-around;
+    border: 1px solid #cccc;
+    box-shadow: -10px 10px 3px -14px rgba(0,0,0,0.5);
+    border-radius: 7px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.navbar-post-limit-box{
+    flex-direction: row-reverse;
+    gap: 10px;
+}
+.navbar-post-limit-box > p {
+    font-weight: bold;
+}
+.posts-list{
+    width: 97vw;
+    flex: 1;
+    background-color: #F4F5FA;
+    margin-top: 70px;
+    padding: 20px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start; 
+    align-items: flex-start;
+    gap: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    box-sizing: border-box;
+}
+.post-box{
+    width: 250px;
+    height: 250px;
+    border-radius: 7px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    border: 1px solid #000;
+    position: relative;
+}
+.post-box-top-menu-three-dots{
+    position: absolute;
+    top: 10;
+    right: 10;
+    width: 50px;
+    height: 20px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F4F5FA;
+    cursor: pointer;
+}
+.ant-dropdown-menu{
+    width: 100px;
+}
+.ant-dropdown-menu-title-content{
+    text-align: center;
+}
+.post-box-top-menu-status{
+    position: absolute;
+    top: 5;
+    left: 10;
+    width: 80px;
+    height: 25px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #D32F2F;
+}
+.post-box-top-menu-status > p {
+    font-size: 12px;
+    color: #fff;
+}
+.post-box-item-main{
+    width: 250px;
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+.post-box-item{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.post-box-item-price{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.post-box-item-old-price-text{
+    font-weight: bold;
+    color: #D32F2F;
+    text-decoration: line-through;
+}
+.post-box-item-new-price-text{
+    font-weight: bold;
+    color: #2E7D32;
+}
+.creating-new-post-modal{
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+.ant-modal-title{
+    text-align: center;
+}
+.creating-new-post-form{
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+.creating-new-post-form-item-name > input,
+.creating-new-post-form-discount-value > div > input{
+    width: 330px;
+    height: 30px;
+    border: 1px solid #cccbcb;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+.creating-new-post-form-toggle{
+    width: 300px;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+}
+.creating-new-post-form-toggle > div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.creating-new-post-form-discount-value{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+}
+.creating-new-post-form-discount-value > div{
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: center;
+}
+.creating-new-post-form-discount-value > div > input{
+    width: 130px;
+}
+.add-new-post-button{
+    width: 80px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #29c978;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+@media screen and (max-width:1100px){
+    .login-box{
+        width:70vw;
+        height:70vh;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: -10px 13px 5px -14px rgba(0,0,0,0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .navbar{
+        width: 100vw;
+        height: 8vh;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        background-color: #29c978;
+    }
+    .navbar_user_box{
+        flex: 3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .navbar_user_box > button{
+        height: 30px;
+        margin-right: 10px;
+    }
+    .add-new-post-box{
+        flex: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .add-new-post-box > div{
+        width: 100px;
+        height: 35px;
+        gap: 5px;
+        cursor: pointer;
+    }
+    .add-new-post-box > div > p {
+        font-size: 13px;
+    }
+    .navbar-post-limit-box{
+        flex: 1;
+        gap: 5px;
+    }
+    .navbar-post-limit-box > p {
+        font-size: 13px;
+        font-weight: bold;
+    }
+    .posts-list{
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: flex-start; 
+        align-items: center;
+        gap: 10;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+    }
+    .post-box{
+        width: 250px;
+        height: 250px;
+        border-radius: 7px;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        border: 1px solid #000;
+        position: relative;
+    }
+    
+}
