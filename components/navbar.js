@@ -7,8 +7,6 @@ import { IoMdAdd } from "react-icons/io"
 import { useRouter } from 'next/navigation'
 import { Modal } from "antd"
 import ClipLoader from "react-spinners/ClipLoader"
-import Image from 'next/image'
-import logo_image from '../public/images/logo.png'
 
 const Navbar = ({postLimit,postLength}) => {
     const router = useRouter();
@@ -63,16 +61,15 @@ const Navbar = ({postLimit,postLength}) => {
 
             const shopData = shopSnap.data();
             const postIds = shopData.posts || [];
-            const limitedPostsNumber = shopData.limited_posts_number || 3;
 
             // Check plan limit
-            if (postIds.length >= limitedPostsNumber) {
-                alert(`لقد وصلت للحد الأقصى للمنشورات في خطتك الحالية (${limitedPostsNumber}). يرجى الاشتراك لإضافة منشورات أكثر.`);
+            if (postLength >= postLimit) {
+                alert(`لقد وصلت للحد الأقصى للمنشورات في خطتك الحالية . يرجى الاشتراك لإضافة منشورات أكثر.`);
                 return;
             }
 
             // No posts yet → allow opening
-            if (postIds.length === 0) {
+            if (postLength === 0) {
                 setOpenAddingNewPostModal(true);
                 return;
             }
@@ -180,11 +177,6 @@ const Navbar = ({postLimit,postLength}) => {
 
     return (
         <div className='navbar'>
-            <div className='navbar-post-limit-box'>
-                <p>{postLimit}</p>
-                <p>/</p>
-                <p>{postLength}</p>
-            </div>
             <div className='add-new-post-box'>
                 {openAddingNewPostModalLoading ? (
                     <div>

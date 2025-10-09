@@ -113,15 +113,14 @@
     height: 12vh;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-around;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
     background-color: #29c978;
 }
-.navbar-post-limit-box,.add-new-post-box,.navbar_user_box{
-    width: 18vw;
+.add-new-post-box,.navbar_user_box{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,13 +157,6 @@
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-}
-.navbar-post-limit-box{
-    flex-direction: row-reverse;
-    gap: 10px;
-}
-.navbar-post-limit-box > p {
-    font-weight: bold;
 }
 .posts-list{
     width: 97vw;
@@ -333,9 +325,13 @@
     cursor: pointer;
 }
 @media screen and (max-width:1100px){
+    .login-container{
+        justify-content: flex-start;
+    }
     .login-box{
-        width:70vw;
-        height:70vh;
+        width:90vw;
+        height:60vh;
+        margin-top: 100px;
         background-color: #fff;
         border-radius: 10px;
         box-shadow: -10px 13px 5px -14px rgba(0,0,0,0.5);
@@ -349,7 +345,7 @@
         height: 8vh;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: space-around;
         position: fixed;
         top: 0;
         left: 0;
@@ -357,7 +353,6 @@
         background-color: #29c978;
     }
     .navbar_user_box{
-        flex: 3;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -367,7 +362,6 @@
         margin-right: 10px;
     }
     .add-new-post-box{
-        flex: 2;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -380,14 +374,6 @@
     }
     .add-new-post-box > div > p {
         font-size: 13px;
-    }
-    .navbar-post-limit-box{
-        flex: 1;
-        gap: 5px;
-    }
-    .navbar-post-limit-box > p {
-        font-size: 13px;
-        font-weight: bold;
     }
     .posts-list{
         width: 100vw;
@@ -402,7 +388,7 @@
         scroll-behavior: smooth;
     }
     .post-box{
-        width: 250px;
+        width: 300px;
         height: 250px;
         border-radius: 7px;
         background-color: #fff;

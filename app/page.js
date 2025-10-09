@@ -1,7 +1,7 @@
 'use client'
 import React,{useState,useEffect} from 'react'
 import {useRouter} from 'next/navigation'
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, onSnapshot,Timestamp } from "firebase/firestore";
 import {DB} from '../firebaseConfig'
 import ClipLoader from "react-spinners/ClipLoader"
 import './style.css'
@@ -12,7 +12,7 @@ const page = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [posts, setPosts] = useState([])
   const [loadingPosts, setLoadingPosts] = useState(false)
-  const [postLimit, setPostLimit] = useState(3)
+  const [postLimit, setPostLimit] = useState(0)
   const router = useRouter()
 
   // Check if admin is logged in
@@ -35,14 +35,28 @@ const page = () => {
     return onSnapshot(shopRef, async (shopSnap) => {
       if (!shopSnap.exists()) {
         setPosts([])
-        setPostLimit(3)
+        setPostLimit(0)
         return
       }
 
       const shopData = shopSnap.data()
       const postIds = shopData.posts || []
-      const limitedPostsNumber = shopData.limited_posts_number || 3
-      setPostLimit(limitedPostsNumber)
+
+      const now = Timestamp.now()
+      let limit = 0
+
+      if (shopData.plan === "free") {
+        limit = 3
+      } else if (shopData.plan === "paid") {
+        const subsEnd = shopData.subs_period?.end
+        if (subsEnd && subsEnd.toMillis() > now.toMillis()) {
+          limit = 100
+        } else {
+          limit = 0
+        }
+      }
+
+      setPostLimit(limit)
 
       if (postIds.length === 0) {
         setPosts([])
