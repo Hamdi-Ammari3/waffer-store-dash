@@ -7,6 +7,22 @@
     margin: 0;
     padding: 0;
 }
+.privacy-container{
+    height: 100vh;
+    padding-inline: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    overflow: auto;
+    background-color: #F4F5FA;
+}
+.privacy-container p {
+    font-size: 14px;
+}
+.privacy-container-main > div{
+    margin-bottom: 20px;
+}
 .login-container{
     height: 100vh;
     display: flex;
