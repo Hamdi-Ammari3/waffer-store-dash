@@ -19,66 +19,76 @@ const page = () => {
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem('shopLoggedIn')
     const shopId = localStorage.getItem('shopID')
+
     if (!adminLoggedIn) {
-      router.push('/login'); // Redirect to login page if not authenticated
-    } else {
-      setIsAuthenticated(true)
-      const unsubscribe = listenShopPosts(shopId)
-      return () => unsubscribe?.() // clean up listener on unmount
+      router.push('/login')
+      return
     }
+
+    setIsAuthenticated(true)
+    const unsubscribe = listenShopPosts(shopId)
+    return () => unsubscribe?.()
   }, [])
 
-  // 🔥 Listen to shop document and update posts automatically
+  //Listen to shop document and update posts automatically
   const listenShopPosts = (shopId) => {
-    const shopRef = doc(DB, "shops", shopId)
+    setLoadingPosts(true);
+    const shopRef = doc(DB, "shops", shopId);
 
-    return onSnapshot(shopRef, async (shopSnap) => {
-      if (!shopSnap.exists()) {
-        setPosts([])
-        setPostLimit(0)
-        return
-      }
-
-      const shopData = shopSnap.data()
-      const postIds = shopData.posts || []
-
-      const now = Timestamp.now()
-      let limit = 0
-
-      if (shopData.plan === "free") {
-        limit = 3
-      } else if (shopData.plan === "paid") {
-        const subsEnd = shopData.subs_period?.end
-        if (subsEnd && subsEnd.toMillis() > now.toMillis()) {
-          limit = 100
-        } else {
-          limit = 0
+    const unsubscribe = onSnapshot(
+      shopRef,
+      async (shopSnap) => {
+        if (!shopSnap.exists()) {
+          setPosts([]);
+          setPostLimit(0);
+          setLoadingPosts(false);
+          return;
         }
-      }
 
-      setPostLimit(limit)
+        const shopData = shopSnap.data();
+        const postObjects = shopData.posts || [];
 
-      if (postIds.length === 0) {
-        setPosts([])
-        return
-      }
-
-      setLoadingPosts(true)
-
-      // Fetch each post document
-      const postsPromises = postIds.map(async (postId) => {
-        const postRef = doc(DB, "posts", postId)
-        const postSnap = await getDoc(postRef)
-        if (postSnap.exists()) {
-          return { id: postId, ...postSnap.data() }
+        // Determine plan limit
+        const now = Timestamp.now();
+        let limit = 0;
+        if (shopData.plan === "free") {
+          limit = 3;
+        } else if (shopData.plan === "paid") {
+          const subsEnd = shopData.subs_period?.end;
+          if (subsEnd && subsEnd.toMillis() > now.toMillis()) {
+            limit = 100;
+          }
         }
-        return null
-      })
 
-      const postsData = (await Promise.all(postsPromises)).filter(Boolean)
-      setPosts(postsData)
-      setLoadingPosts(false)
-    })
+        setPostLimit(limit);
+
+        if (postObjects.length === 0) {
+          setPosts([]);
+          setLoadingPosts(false);
+          return;
+        }
+
+        // Fetch all posts
+        const postsPromises = postObjects.map(async (postObj) => {
+          const postRef = doc(DB, "posts", postObj.id);
+          const postSnap = await getDoc(postRef);
+          if (postSnap.exists()) {
+            return { id: postObj.id, ...postSnap.data() };
+          }
+          return null;
+        });
+
+        const postsData = (await Promise.all(postsPromises)).filter(Boolean);
+        setPosts(postsData);
+        setLoadingPosts(false); // ✅ now set after the first data is ready
+      },
+      (error) => {
+        console.error("Error listening to shop posts:", error);
+        setLoadingPosts(false);
+      }
+    );
+
+    return unsubscribe;
   }
 
   // Callback to update a post in state
@@ -110,7 +120,9 @@ const page = () => {
             <Post key={post.id} post={post} onUpdatePost={handleUpdatePost}/>
           ))
         ) : (
-          <p style={{ textAlign: 'center', marginTop: 50 }}>لا توجد منشورات حاليا</p>
+          <div className='no-posts-list'>
+            <p style={{ textAlign: 'center', marginTop: 50 }}>لا توجد منشورات حاليا</p>
+          </div>
         )}
       </div>
     </div>

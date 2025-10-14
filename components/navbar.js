@@ -1,9 +1,11 @@
 import React,{useEffect,useState} from 'react'
 import { doc, updateDoc, getDoc, collection, addDoc,Timestamp } from "firebase/firestore";
-import { DB } from '../firebaseConfig';
+import { DB } from '../firebaseConfig'
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import dayjs from 'dayjs'
 import { CiLogout } from "react-icons/ci"
 import { IoMdAdd } from "react-icons/io"
+import { IoMdCloseCircleOutline } from "react-icons/io"
 import { useRouter } from 'next/navigation'
 import { Modal } from "antd"
 import ClipLoader from "react-spinners/ClipLoader"
@@ -15,6 +17,8 @@ const Navbar = ({postLimit,postLength}) => {
     const [openAddingNewPostModal,setOpenAddingNewPostModal] = useState(false)
     const [openAddingNewPostModalLoading,setOpenAddingNewPostModalLoading] = useState(false)
     const [productName,setProductName] = useState('')
+    const [selectedImages, setSelectedImages] = useState([])
+    const [imageFiles, setImageFiles] = useState([])
     const [discountType,setDiscountType] = useState('price')
     const [oldPrice,setOldPrice] = useState(0)
     const [newPrice,setNewPrice] = useState(0)
@@ -74,9 +78,10 @@ const Navbar = ({postLimit,postLength}) => {
                 return;
             }
 
+
             // Get last (most recent) post
-            const lastPostId = postIds[0];
-            const lastPostRef = doc(DB, "posts", lastPostId);
+            const lastPostObj = postIds[0];
+            const lastPostRef = doc(DB, "posts", lastPostObj.id);
             const lastPostSnap = await getDoc(lastPostRef);
 
             if (!lastPostSnap.exists()) {
@@ -87,7 +92,7 @@ const Navbar = ({postLimit,postLength}) => {
             const lastPost = lastPostSnap.data();
             const now = Timestamp.now();
 
-            if (lastPost.end_date > now && !lastPost.canceled) {
+            if (lastPostObj.end_date.toMillis() > now.toMillis() && !lastPost.canceled) {
                 alert("يوجد منشور نشط حاليا، يرجى الانتظار حتى انتهاء المنشور الحالي قبل إضافة منشور جديد.");
                 return;
             }
@@ -135,9 +140,21 @@ const Navbar = ({postLimit,postLength}) => {
             const shopSnap = await getDoc(shopRef);
             const shopData = shopSnap.exists() ? shopSnap.data() : {};
 
+            const storage = getStorage();
+            const imageUrls = [];
+
+             // Upload all images and get URLs
+            for (const file of imageFiles) {
+                const storageRef = ref(storage, `posts/${shopId}/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(storageRef);
+                imageUrls.push(downloadURL);
+            }
+
             // Create post document
             const postRef = await addDoc(collection(DB, "posts"), {
                 prod_name: productName,
+                images: imageUrls,
                 category:shopData?.category || null,
                 discount_type: discountType,
                 ...(discountType === 'price'
@@ -151,8 +168,13 @@ const Navbar = ({postLimit,postLength}) => {
                 canceled: false,
             });
 
+            const newPostEntry = { 
+                id: postRef.id, 
+                end_date: endDate
+            };
+
             const currentPosts = shopData.posts || [];
-            const updatedPosts = [postRef.id, ...currentPosts];
+            const updatedPosts = [newPostEntry, ...currentPosts];
 
             // Add post ID to shop’s post list
             await updateDoc(shopRef, { posts: updatedPosts });
@@ -163,6 +185,8 @@ const Navbar = ({postLimit,postLength}) => {
             setNewPrice(0);
             setPercentageAmount(0);
             setDiscountType('price');
+            setImageFiles([]);
+            setSelectedImages([]);
             setOpenAddingNewPostModal(false);
 
             alert('تم إضافة المنشور بنجاح ✅');
@@ -212,6 +236,49 @@ const Navbar = ({postLimit,postLength}) => {
                                 onChange={(e) => setProductName(e.target.value)} 
                             />
                         </div>
+
+                        <div className='adding-new-image-input-box'>
+                            <label htmlFor="image-upload" className="custom-upload-button">
+                                إضافة صور
+                            </label>
+                            <input
+                                id="image-upload"
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                    const files = Array.from(e.target.files);
+                                    const newFiles = [...imageFiles, ...files];
+                                    setImageFiles(newFiles);
+
+                                    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+                                    setSelectedImages(newPreviews);
+                                }}
+                            />
+                        </div>
+
+                        {selectedImages.length > 0 && (
+                            <div className='images-thumbs-box'>
+                                <div className='images-slider'>
+                                    {selectedImages.map((src, idx) => (
+                                        <div key={idx} className='image-thumb-item'>
+                                            <img src={src} alt="Preview" />
+                                            <IoMdCloseCircleOutline 
+                                                className='remove-thumb'
+                                                onClick={() => {
+                                                    const updatedFiles = imageFiles.filter((_, i) => i !== idx);
+                                                    const updatedPreviews = selectedImages.filter((_, i) => i !== idx);
+                                                    setImageFiles(updatedFiles);
+                                                    setSelectedImages(updatedPreviews);
+                                                }}
+                                            />                                           
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className='creating-new-post-form-toggle'>
                             <div>
                                 <input
@@ -232,6 +299,7 @@ const Navbar = ({postLimit,postLength}) => {
                                 <h5>نسبة مئوية</h5>
                             </div>
                         </div>
+
                         {discountType === 'price' ? (
                             <div className='creating-new-post-form-discount-value'>
                                 <div>
