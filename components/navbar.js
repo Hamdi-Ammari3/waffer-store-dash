@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react'
-import { doc, updateDoc, getDoc, collection, addDoc,Timestamp } from "firebase/firestore";
+import { doc, updateDoc, getDoc, collection, addDoc,Timestamp } from "firebase/firestore"
 import { DB } from '../firebaseConfig'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import dayjs from 'dayjs'
@@ -11,7 +11,7 @@ import { Modal } from "antd"
 import ClipLoader from "react-spinners/ClipLoader"
 
 const Navbar = ({postLimit,postLength}) => {
-    const router = useRouter();
+    const router = useRouter()
     const [userName,setUserName] = useState('')
     const [isLoggingOut,setIsLoggingOUt] = useState(false)
     const [openAddingNewPostModal,setOpenAddingNewPostModal] = useState(false)
@@ -154,8 +154,10 @@ const Navbar = ({postLimit,postLength}) => {
             // Create post document
             const postRef = await addDoc(collection(DB, "posts"), {
                 prod_name: productName,
+                category:shopData?.category,
+                address:shopData?.address,
+                phone:shopData?.phone,
                 images: imageUrls,
-                category:shopData?.category || null,
                 discount_type: discountType,
                 ...(discountType === 'price'
                     ? { old_price: Number(oldPrice), new_price: Number(newPrice) }
@@ -163,7 +165,7 @@ const Navbar = ({postLimit,postLength}) => {
                 start_date: startDate,
                 end_date: endDate,
                 shop_name: shopName,
-                location: shopData?.location || null,
+                location: shopData?.location,
                 shop_id: shopId,
                 canceled: false,
             });
