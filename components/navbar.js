@@ -196,6 +196,7 @@ const Navbar = ({postLimit,postLength}) => {
                 location: shopData?.location,
                 shop_id: shopId,
                 canceled: false,
+                createdAt: Timestamp.now(),
             });
 
             const newPostEntry = { id: postRef.id, end_date: endDate}
