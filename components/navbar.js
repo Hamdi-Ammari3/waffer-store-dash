@@ -3,6 +3,7 @@ import { doc, updateDoc, getDoc, collection, addDoc,Timestamp } from "firebase/f
 import { DB } from '../firebaseConfig'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import dayjs from 'dayjs'
+import imageCompression from "browser-image-compression"
 import { CiLogout } from "react-icons/ci"
 import { IoMdAdd } from "react-icons/io"
 import { IoMdCloseCircleOutline } from "react-icons/io"
@@ -118,6 +119,11 @@ const Navbar = ({postLimit,postLength}) => {
             return;
         }
 
+        if(!imageFiles?.length) {
+            alert('يرجى اضافة صورة المنتج');
+            return;
+        }
+
         if (discountType === 'price' && (!oldPrice || !newPrice)) {
             alert('يرجى إدخال المبالغ');
             return;
@@ -151,12 +157,34 @@ const Navbar = ({postLimit,postLength}) => {
                 imageUrls.push(downloadURL);
             }
 
+            // ✅ Generate and upload thumbnail from the first image
+            const firstFile = imageFiles[0];
+            let thumbnailUrl = imageUrls[0]; // fallback to full if compression fails
+
+            if (firstFile) {
+                try {
+                    // Compress to ~100×100px (small but clear)
+                    const compressed = await imageCompression(firstFile, {
+                        maxWidthOrHeight: 100,
+                        useWebWorker: true,
+                        maxSizeMB: 0.05, // around 50KB max
+                    });
+
+                    const thumbRef = ref(storage, `posts/${shopId}/thumb_${Date.now()}_${firstFile.name}`);
+                    await uploadBytes(thumbRef, compressed);
+                    thumbnailUrl = await getDownloadURL(thumbRef);
+                } catch (thumbErr) {
+                    console.log("Thumbnail compression failed:", thumbErr);
+                }
+            }
+
             // Create post document
             const postRef = await addDoc(collection(DB, "posts"), {
                 prod_name: productName,
                 category:shopData?.category,
                 address:shopData?.address,
                 phone:shopData?.phone,
+                thumbnail: thumbnailUrl,
                 images: imageUrls,
                 discount_type: discountType,
                 ...(discountType === 'price'
@@ -170,15 +198,11 @@ const Navbar = ({postLimit,postLength}) => {
                 canceled: false,
             });
 
-            const newPostEntry = { 
-                id: postRef.id, 
-                end_date: endDate
-            };
+            const newPostEntry = { id: postRef.id, end_date: endDate}
 
             const currentPosts = shopData.posts || [];
             const updatedPosts = [newPostEntry, ...currentPosts];
 
-            // Add post ID to shop’s post list
             await updateDoc(shopRef, { posts: updatedPosts });
 
             // Reset form and close modal
