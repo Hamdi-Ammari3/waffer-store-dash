@@ -100,7 +100,7 @@ const Post = ({post,onUpdatePost }) => {
 
       <div className='post-box-item-main'>
         <div className='post-box-item'>
-          <h5>{post.prod_name}</h5>
+          <h5 style={{textAlign:'center'}}>{post.prod_name}</h5>
         </div>
         <div className='post-box-item'>
           {post.discount_type === 'price' ? (
